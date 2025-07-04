@@ -2,6 +2,7 @@ import React from 'react';
 import { ShoppingCart, Eye, Edit, Trash2 } from 'lucide-react';
 import { Product } from '../types';
 import { useEcommerce } from '../context/EcommerceContext';
+import { useCart } from '../context/CartContext';
 import { formatIndianCurrency } from '../utils/currency';
 
 interface ProductCardProps {
@@ -9,7 +10,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { setSelectedProduct, deleteProduct, isAdmin } = useEcommerce();
+  const { setSelectedProduct, deleteProduct, isUserAdmin } = useEcommerce();
+  const { addToCart } = useCart();
 
   const currentPrice = product.discountedPrice || product.regularPrice;
   const hasDiscount = !!product.discountedPrice;
@@ -19,6 +21,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (confirm('Are you sure you want to delete this product?')) {
       deleteProduct(product.id);
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToCart(product);
   };
 
   return (
@@ -47,7 +54,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             >
               <Eye className="h-4 w-4" />
             </button>
-            {isAdmin && (
+            {isUserAdmin && (
               <>
                 <button className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors">
                   <Edit className="h-4 w-4" />
@@ -85,6 +92,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">{product.category}</span>
           <button
+            onClick={handleAddToCart}
             disabled={product.stock === 0}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
           >

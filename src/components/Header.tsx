@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Search, ShoppingCart, Menu, X, User, Settings, LogOut } from 'lucide-react';
 import { useEcommerce } from '../context/EcommerceContext';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { AuthModal } from './auth/AuthModal';
 
 export const Header: React.FC = () => {
-  const { categories, setFilter, filter, isAdmin, toggleAdmin } = useEcommerce();
+  const { categories, setFilter, filter, isAdminPanelOpen, isUserAdmin, toggleAdminPanel } = useEcommerce();
   const { user, isAuthenticated, logout } = useAuth();
+  const { cart, toggleCart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -86,16 +88,16 @@ export const Header: React.FC = () => {
                         <span>Profile</span>
                       </button>
 
-                      {user?.role === 'admin' && (
+                      {isUserAdmin && (
                         <button
                           onClick={() => {
-                            toggleAdmin();
+                            toggleAdminPanel();
                             setShowUserMenu(false);
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                         >
                           <Settings className="h-4 w-4" />
-                          <span>{isAdmin ? 'Exit Admin' : 'Admin Panel'}</span>
+                          <span>{isAdminPanelOpen ? 'Exit Admin Panel' : 'Admin Panel'}</span>
                         </button>
                       )}
 
@@ -129,11 +131,16 @@ export const Header: React.FC = () => {
                 </div>
               )}
 
-              <button className="p-2 hover:bg-gray-100 rounded-full relative">
+              <button 
+                onClick={toggleCart}
+                className="p-2 hover:bg-gray-100 rounded-full relative"
+              >
                 <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  0
-                </span>
+                {cart.totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {cart.totalItems}
+                  </span>
+                )}
               </button>
 
               <button

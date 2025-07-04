@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Loader2, Shield, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { LoginCredentials } from '../../types/auth';
 
@@ -55,6 +55,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
     }
   };
 
+  const handleDemoLogin = (userType: 'admin' | 'customer') => {
+    if (userType === 'admin') {
+      setFormData({
+        email: 'admin@shophub.com',
+        password: 'AdminPassword123!',
+        rememberMe: false,
+      });
+    } else {
+      setFormData({
+        email: 'customer@example.com',
+        password: 'CustomerPass123!',
+        rememberMe: false,
+      });
+    }
+  };
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-8">
@@ -68,6 +84,55 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
           <span className="text-red-700 text-sm">{error}</span>
         </div>
       )}
+
+      {/* Demo Credentials - Moved to top for better visibility */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          Demo Accounts - Click to Use:
+        </h4>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('admin')}
+            className="w-full p-3 bg-white border border-blue-200 rounded-md hover:bg-blue-50 transition-colors text-left"
+            disabled={isLoading}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center text-sm font-medium text-blue-900">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin Account
+                </div>
+                <div className="text-xs text-blue-700 mt-1">
+                  admin@shophub.com
+                </div>
+              </div>
+              <div className="text-xs text-blue-600">Click to fill form</div>
+            </div>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleDemoLogin('customer')}
+            className="w-full p-3 bg-white border border-blue-200 rounded-md hover:bg-blue-50 transition-colors text-left"
+            disabled={isLoading}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center text-sm font-medium text-blue-900">
+                  <User className="h-4 w-4 mr-2" />
+                  Customer Account
+                </div>
+                <div className="text-xs text-blue-700 mt-1">
+                  customer@example.com
+                </div>
+              </div>
+              <div className="text-xs text-blue-600">Click to fill form</div>
+            </div>
+          </button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -171,19 +236,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onClos
             Sign up
           </button>
         </p>
-      </div>
-
-      {/* Demo Credentials */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h4 className="text-sm font-medium text-gray-900 mb-2">Demo Credentials:</h4>
-        <div className="text-xs text-gray-600 space-y-1">
-          <div>
-            <strong>Admin:</strong> admin@shophub.com / AdminPassword123!
-          </div>
-          <div>
-            <strong>Customer:</strong> customer@example.com / CustomerPass123!
-          </div>
-        </div>
       </div>
     </div>
   );

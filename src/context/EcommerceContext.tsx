@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, Category, Filter, SortOption } from '../types';
 import { products as initialProducts, categories as initialCategories } from '../data/mockData';
+import { useAuth } from './AuthContext';
 
 interface EcommerceContextType {
   products: Product[];
@@ -9,7 +10,8 @@ interface EcommerceContextType {
   filter: Filter;
   sortOption: SortOption;
   selectedProduct: Product | null;
-  isAdmin: boolean;
+  isAdminPanelOpen: boolean;
+  isUserAdmin: boolean;
   // Product management
   addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void;
   updateProduct: (id: string, updates: Partial<Product>) => void;
@@ -22,8 +24,9 @@ interface EcommerceContextType {
   setFilter: (filter: Filter) => void;
   setSortOption: (sort: SortOption) => void;
   setSelectedProduct: (product: Product | null) => void;
-  // Admin toggle
-  toggleAdmin: () => void;
+  // Admin panel control
+  toggleAdminPanel: () => void;
+  closeAdminPanel: () => void;
 }
 
 const EcommerceContext = createContext<EcommerceContextType | undefined>(undefined);
@@ -37,13 +40,17 @@ export const useEcommerce = () => {
 };
 
 export const EcommerceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isAuthenticated } = useAuth();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
   const [filter, setFilter] = useState<Filter>({});
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
+
+  // Check if current user is admin
+  const isUserAdmin = isAuthenticated && user?.role === 'admin';
 
   // Filter and sort products
   useEffect(() => {
@@ -128,9 +135,22 @@ export const EcommerceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setCategories(prev => prev.filter(c => c.id !== id));
   };
 
-  const toggleAdmin = () => {
-    setIsAdmin(prev => !prev);
+  const toggleAdminPanel = () => {
+    if (isUserAdmin) {
+      setIsAdminPanelOpen(prev => !prev);
+    }
   };
+
+  const closeAdminPanel = () => {
+    setIsAdminPanelOpen(false);
+  };
+
+  // Close admin panel when user logs out or is no longer admin
+  useEffect(() => {
+    if (!isUserAdmin) {
+      setIsAdminPanelOpen(false);
+    }
+  }, [isUserAdmin]);
 
   return (
     <EcommerceContext.Provider value={{
@@ -140,7 +160,8 @@ export const EcommerceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       filter,
       sortOption,
       selectedProduct,
-      isAdmin,
+      isAdminPanelOpen,
+      isUserAdmin,
       addProduct,
       updateProduct,
       deleteProduct,
@@ -150,7 +171,8 @@ export const EcommerceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setFilter,
       setSortOption,
       setSelectedProduct,
-      toggleAdmin
+      toggleAdminPanel,
+      closeAdminPanel
     }}>
       {children}
     </EcommerceContext.Provider>

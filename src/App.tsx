@@ -5,11 +5,14 @@ import { ProductListing } from './components/ProductListing';
 import { ProductDetail } from './components/ProductDetail';
 import { AdminPanel } from './components/AdminPanel';
 import { UserProfile } from './components/auth/UserProfile';
+import { CartSidebar } from './components/CartSidebar';
+import { CheckoutModal } from './components/CheckoutModal';
 import { EcommerceProvider, useEcommerce } from './context/EcommerceContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 function AppContent() {
-  const { selectedProduct, setSelectedProduct, filter, isAdmin } = useEcommerce();
+  const { selectedProduct, setSelectedProduct, filter, isAdminPanelOpen, isUserAdmin } = useEcommerce();
   const { isAuthenticated, user, isLoading } = useAuth();
 
   const showHomepage = !filter.category && !filter.subcategory && !filter.search;
@@ -30,7 +33,7 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {isAdmin && isAuthenticated && user?.role === 'admin' ? (
+      {isAdminPanelOpen && isUserAdmin ? (
         <AdminPanel />
       ) : (
         <>
@@ -44,6 +47,10 @@ function AppContent() {
           )}
         </>
       )}
+      
+      {/* Cart Components */}
+      <CartSidebar />
+      <CheckoutModal />
     </div>
   );
 }
@@ -52,7 +59,9 @@ function App() {
   return (
     <AuthProvider>
       <EcommerceProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </EcommerceProvider>
     </AuthProvider>
   );
