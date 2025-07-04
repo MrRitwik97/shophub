@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
-import { Search, ShoppingCart, Menu, X, User, Settings, LogOut } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, User, Settings, LogOut, Package, Users } from 'lucide-react';
 import { useEcommerce } from '../context/EcommerceContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { AuthModal } from './auth/AuthModal';
 
-export const Header: React.FC = () => {
-  const { categories, setFilter, filter, isAdminPanelOpen, isUserAdmin, toggleAdminPanel } = useEcommerce();
+interface HeaderProps {
+  onCartClick: () => void;
+  onAuthClick: () => void;
+  setAuthMode: (mode: 'login' | 'register') => void;
+  currentView: 'shop' | 'admin' | 'profile' | 'customers';
+  onNavigate: (view: 'shop' | 'admin' | 'profile' | 'customers') => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  onCartClick,
+  onAuthClick,
+  setAuthMode,
+  currentView,
+  onNavigate
+}) => {
+  const { categories, setFilter, filter } = useEcommerce();
   const { user, isAuthenticated, logout } = useAuth();
-  const { cart, toggleCart } = useCart();
+  const { cart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -21,8 +32,8 @@ export const Header: React.FC = () => {
   };
 
   const handleAuthClick = (mode: 'login' | 'register') => {
-    setAuthModalMode(mode);
-    setShowAuthModal(true);
+    setAuthMode(mode);
+    onAuthClick();
   };
 
   const handleUserMenuClick = () => {
@@ -77,28 +88,42 @@ export const Header: React.FC = () => {
                         <p className="text-xs text-gray-500">{user?.email}</p>
                       </div>
                       
-                      <button
-                        onClick={() => {
-                          setShowUserMenu(false);
-                          // Navigate to profile (you can implement routing here)
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
-                      >
-                        <User className="h-4 w-4" />
-                        <span>Profile</span>
-                      </button>
-
-                      {isUserAdmin && (
+                      {user?.role === 'customer' && (
                         <button
                           onClick={() => {
-                            toggleAdminPanel();
                             setShowUserMenu(false);
+                            onNavigate('profile');
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                         >
-                          <Settings className="h-4 w-4" />
-                          <span>{isAdminPanelOpen ? 'Exit Admin Panel' : 'Admin Panel'}</span>
+                          <User className="h-4 w-4" />
+                          <span>My Profile</span>
                         </button>
+                      )}
+
+                      {user?.role === 'admin' && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              onNavigate('admin');
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span>Admin Panel</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              onNavigate('customers');
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>Customer Management</span>
+                          </button>
+                        </>
                       )}
 
                       <button
@@ -132,7 +157,7 @@ export const Header: React.FC = () => {
               )}
 
               <button 
-                onClick={toggleCart}
+                onClick={onCartClick}
                 className="p-2 hover:bg-gray-100 rounded-full relative"
               >
                 <ShoppingCart className="h-5 w-5" />
@@ -156,38 +181,99 @@ export const Header: React.FC = () => {
           <nav className={`${isMenuOpen ? 'block' : 'hidden'} md:block border-t border-gray-200`}>
             <div className="py-4">
               <div className="flex flex-col md:flex-row md:items-center md:space-x-8">
+                {/* Main Navigation */}
                 <button
-                  onClick={() => setFilter({})}
-                  className="text-gray-700 hover:text-blue-600 py-2 px-4 rounded-md hover:bg-gray-100 transition-colors text-left"
+                  onClick={() => onNavigate('shop')}
+                  className={`py-2 px-4 rounded-md transition-colors text-left ${
+                    currentView === 'shop' 
+                      ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600' 
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                  }`}
                 >
-                  All Products
+                  Shop
                 </button>
-                {categories.map(category => (
-                  <div key={category.id} className="relative group">
+
+                {/* Customer Profile Link */}
+                {isAuthenticated && user?.role === 'customer' && (
+                  <button
+                    onClick={() => onNavigate('profile')}
+                    className={`py-2 px-4 rounded-md transition-colors text-left flex items-center space-x-2 ${
+                      currentView === 'profile' 
+                        ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600' 
+                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <User className="h-4 w-4" />
+                    <span>My Account</span>
+                  </button>
+                )}
+
+                {/* Admin Links */}
+                {isAuthenticated && user?.role === 'admin' && (
+                  <>
                     <button
-                      onClick={() => setFilter({ category: category.name })}
-                      className="text-gray-700 hover:text-blue-600 py-2 px-4 rounded-md hover:bg-gray-100 transition-colors text-left"
+                      onClick={() => onNavigate('admin')}
+                      className={`py-2 px-4 rounded-md transition-colors text-left flex items-center space-x-2 ${
+                        currentView === 'admin' 
+                          ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600' 
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                      }`}
                     >
-                      {category.name}
+                      <Settings className="h-4 w-4" />
+                      <span>Admin Panel</span>
                     </button>
-                    {category.subcategories && (
-                      <div className="absolute left-0 top-full mt-1 w-48 bg-white shadow-lg rounded-md border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                        {category.subcategories.map(subcategory => (
-                          <button
-                            key={subcategory.id}
-                            onClick={() => setFilter({ 
-                              category: category.name, 
-                              subcategory: subcategory.name 
-                            })}
-                            className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 first:rounded-t-md last:rounded-b-md"
-                          >
-                            {subcategory.name}
-                          </button>
-                        ))}
+                    <button
+                      onClick={() => onNavigate('customers')}
+                      className={`py-2 px-4 rounded-md transition-colors text-left flex items-center space-x-2 ${
+                        currentView === 'customers' 
+                          ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600' 
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>Customer Management</span>
+                    </button>
+                  </>
+                )}
+
+                {/* Product Categories - Only show when on Shop view */}
+                {currentView === 'shop' && (
+                  <>
+                    <div className="h-6 border-l border-gray-300 hidden md:block"></div>
+                    <button
+                      onClick={() => setFilter({})}
+                      className="text-gray-600 hover:text-blue-600 py-2 px-4 rounded-md hover:bg-gray-100 transition-colors text-left"
+                    >
+                      All Products
+                    </button>
+                    {categories.map(category => (
+                      <div key={category.id} className="relative group">
+                        <button
+                          onClick={() => setFilter({ category: category.name })}
+                          className="text-gray-600 hover:text-blue-600 py-2 px-4 rounded-md hover:bg-gray-100 transition-colors text-left"
+                        >
+                          {category.name}
+                        </button>
+                        {category.subcategories && (
+                          <div className="absolute left-0 top-full mt-1 w-48 bg-white shadow-lg rounded-md border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            {category.subcategories.map(subcategory => (
+                              <button
+                                key={subcategory.id}
+                                onClick={() => setFilter({ 
+                                  category: category.name, 
+                                  subcategory: subcategory.name 
+                                })}
+                                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-blue-600 first:rounded-t-md last:rounded-b-md"
+                              >
+                                {subcategory.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </nav>
@@ -207,13 +293,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </header>
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        initialMode={authModalMode}
-      />
 
       {/* Click outside to close user menu */}
       {showUserMenu && (

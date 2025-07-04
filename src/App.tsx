@@ -88,80 +88,13 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Enhanced Header with Navigation */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo and Navigation */}
-            <div className="flex items-center space-x-8">
-              <button
-                onClick={() => handleNavigation('shop')}
-                className="text-2xl font-bold text-indigo-600 hover:text-indigo-700"
-              >
-                ShopHub
-              </button>
-              
-              {/* Navigation Links */}
-              <nav className="hidden md:flex items-center space-x-6">
-                <button
-                  onClick={() => handleNavigation('shop')}
-                  className={`text-sm font-medium transition-colors ${
-                    currentView === 'shop' 
-                      ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' 
-                      : 'text-gray-700 hover:text-indigo-600'
-                  }`}
-                >
-                  Shop
-                </button>
-                
-                {isAuthenticated && user?.role === 'customer' && (
-                  <button
-                    onClick={() => handleNavigation('profile')}
-                    className={`text-sm font-medium transition-colors ${
-                      currentView === 'profile' 
-                        ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' 
-                        : 'text-gray-700 hover:text-indigo-600'
-                    }`}
-                  >
-                    My Account
-                  </button>
-                )}
-                
-                {isAuthenticated && user?.role === 'admin' && (
-                  <>
-                    <button
-                      onClick={() => handleNavigation('admin')}
-                      className={`text-sm font-medium transition-colors ${
-                        currentView === 'admin' 
-                          ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' 
-                          : 'text-gray-700 hover:text-indigo-600'
-                      }`}
-                    >
-                      Admin Panel
-                    </button>
-                    <button
-                      onClick={() => handleNavigation('customers')}
-                      className={`text-sm font-medium transition-colors ${
-                        currentView === 'customers' 
-                          ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' 
-                          : 'text-gray-700 hover:text-indigo-600'
-                      }`}
-                    >
-                      Customer Management
-                    </button>
-                  </>
-                )}
-              </nav>
-            </div>
-
-            {/* Header Actions */}
-            <Header 
-              onCartClick={() => setIsCartOpen(true)}
-              onAuthClick={() => setIsAuthModalOpen(true)}
-              setAuthMode={setAuthMode}
-            />
-          </div>
-        </div>
-      </header>
+      <Header 
+        onCartClick={() => setIsCartOpen(true)}
+        onAuthClick={() => setIsAuthModalOpen(true)}
+        setAuthMode={setAuthMode}
+        currentView={currentView}
+        onNavigate={handleNavigation}
+      />
 
       {/* Main Content */}
       <main>
