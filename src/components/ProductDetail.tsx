@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { Product } from '../types';
 import { useEcommerce } from '../context/EcommerceContext';
+import { useCart } from '../context/CartContext';
 import { formatIndianCurrency } from '../utils/currency';
 
 interface ProductDetailProps {
@@ -13,6 +14,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const { categories } = useEcommerce();
+  const { addToCart } = useCart();
 
   const currentPrice = product.discountedPrice || product.regularPrice;
   const hasDiscount = !!product.discountedPrice;
@@ -31,6 +33,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }
       return `${category.name} > ${product.subcategory}`;
     }
     return product.category;
+  };
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
   };
 
   return (
@@ -157,6 +163,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onClose }
 
                 <div className="flex space-x-4">
                   <button
+                    onClick={handleAddToCart}
                     disabled={product.stock === 0}
                     className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
                   >
