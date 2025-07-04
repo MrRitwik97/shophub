@@ -11,10 +11,13 @@ interface CheckoutStep {
   completed: boolean;
 }
 
-export const CheckoutModal: React.FC = () => {
+interface CheckoutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
   const { 
-    isCheckoutOpen, 
-    closeCheckout, 
     getCartItemsWithProducts, 
     calculateTotals,
     createOrder 
@@ -62,7 +65,7 @@ export const CheckoutModal: React.FC = () => {
     { id: 'confirmation', title: 'Confirmation', completed: false },
   ];
 
-  if (!isCheckoutOpen) return null;
+  if (!isOpen) return null;
   if (!isAuthenticated) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -70,7 +73,7 @@ export const CheckoutModal: React.FC = () => {
           <h3 className="text-lg font-semibold mb-4">Please Sign In</h3>
           <p className="text-gray-600 mb-6">You need to be signed in to proceed with checkout.</p>
           <button
-            onClick={closeCheckout}
+            onClick={onClose}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
           >
             Close

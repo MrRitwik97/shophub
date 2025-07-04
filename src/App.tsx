@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, User, Settings } from 'lucide-react';
 import { Header } from './components/Header';
 import { ProductCard } from './components/ProductCard';
@@ -19,13 +19,24 @@ import { useEcommerce } from './context/EcommerceContext';
 
 // Main App Content Component
 const AppContent: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { products, selectedProduct, setSelectedProduct } = useEcommerce();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { products, filteredProducts, selectedProduct, setSelectedProduct } = useEcommerce();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [currentView, setCurrentView] = useState<'shop' | 'admin' | 'profile' | 'customers'>('shop');
+
+  // Reset view to shop when user logs out or loses admin privileges
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentView('shop');
+    } else if (user?.role !== 'admin' && (currentView === 'admin' || currentView === 'customers')) {
+      setCurrentView('shop');
+    } else if (user?.role !== 'customer' && currentView === 'profile') {
+      setCurrentView('shop');
+    }
+  }, [isAuthenticated, user?.role, currentView]);
 
   // Navigation based on user role and authentication
   const handleNavigation = (view: 'shop' | 'admin' | 'profile' | 'customers') => {
@@ -76,7 +87,7 @@ const AppContent: React.FC = () => {
               <p className="text-gray-600">Discover our latest collection of premium products</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

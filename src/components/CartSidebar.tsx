@@ -3,29 +3,32 @@ import { X, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { formatIndianCurrency } from '../utils/currency';
 
-export const CartSidebar: React.FC = () => {
+interface CartSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCheckout: () => void;
+}
+
+export const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose, onCheckout }) => {
   const {
     cart,
-    isCartOpen,
-    closeCart,
     removeFromCart,
     updateQuantity,
     getCartItemsWithProducts,
     calculateTotals,
-    openCheckout,
   } = useCart();
 
   const cartItems = getCartItemsWithProducts();
   const totals = calculateTotals();
 
-  if (!isCartOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
-        onClick={closeCart}
+        onClick={onClose}
       />
       
       {/* Sidebar */}
@@ -37,7 +40,7 @@ export const CartSidebar: React.FC = () => {
               Shopping Cart ({cart.totalItems})
             </h2>
             <button
-              onClick={closeCart}
+              onClick={onClose}
               className="rounded-md p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
             >
               <X className="h-5 w-5" />
@@ -52,7 +55,7 @@ export const CartSidebar: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
                 <p className="text-gray-500 mb-4">Start shopping to add items to your cart</p>
                 <button
-                  onClick={closeCart}
+                  onClick={onClose}
                   className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Continue Shopping
@@ -174,7 +177,7 @@ export const CartSidebar: React.FC = () => {
 
               {/* Checkout Button */}
               <button
-                onClick={openCheckout}
+                onClick={onCheckout}
                 className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mt-4"
               >
                 <span>Proceed to Checkout</span>
@@ -183,7 +186,7 @@ export const CartSidebar: React.FC = () => {
 
               {/* Continue Shopping */}
               <button
-                onClick={closeCart}
+                onClick={onClose}
                 className="w-full text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 transition-colors mt-2"
               >
                 Continue Shopping
