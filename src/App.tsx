@@ -12,7 +12,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
 function AppContent() {
-  const { selectedProduct, setSelectedProduct, filter, isAdmin } = useEcommerce();
+  const { selectedProduct, setSelectedProduct, filter, isAdminPanelOpen, isUserAdmin } = useEcommerce();
   const { isAuthenticated, user, isLoading } = useAuth();
 
   const showHomepage = !filter.category && !filter.subcategory && !filter.search;
@@ -33,7 +33,7 @@ function AppContent() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {isAdmin && isAuthenticated && user?.role === 'admin' ? (
+      {isAdminPanelOpen && isUserAdmin ? (
         <AdminPanel />
       ) : (
         <>

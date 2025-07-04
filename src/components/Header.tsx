@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 import { AuthModal } from './auth/AuthModal';
 
 export const Header: React.FC = () => {
-  const { categories, setFilter, filter, isAdmin, toggleAdmin } = useEcommerce();
+  const { categories, setFilter, filter, isAdminPanelOpen, isUserAdmin, toggleAdminPanel } = useEcommerce();
   const { user, isAuthenticated, logout } = useAuth();
   const { cart, toggleCart } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -88,16 +88,16 @@ export const Header: React.FC = () => {
                         <span>Profile</span>
                       </button>
 
-                      {user?.role === 'admin' && (
+                      {isUserAdmin && (
                         <button
                           onClick={() => {
-                            toggleAdmin();
+                            toggleAdminPanel();
                             setShowUserMenu(false);
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                         >
                           <Settings className="h-4 w-4" />
-                          <span>{isAdmin ? 'Exit Admin' : 'Admin Panel'}</span>
+                          <span>{isAdminPanelOpen ? 'Exit Admin Panel' : 'Admin Panel'}</span>
                         </button>
                       )}
 

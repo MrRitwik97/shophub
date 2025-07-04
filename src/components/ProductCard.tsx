@@ -10,7 +10,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { setSelectedProduct, deleteProduct, isAdmin } = useEcommerce();
+  const { setSelectedProduct, deleteProduct, isUserAdmin } = useEcommerce();
   const { addToCart } = useCart();
 
   const currentPrice = product.discountedPrice || product.regularPrice;
@@ -54,7 +54,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             >
               <Eye className="h-4 w-4" />
             </button>
-            {isAdmin && (
+            {isUserAdmin && (
               <>
                 <button className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors">
                   <Edit className="h-4 w-4" />
