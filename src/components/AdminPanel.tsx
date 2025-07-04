@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { useEcommerce } from '../context/EcommerceContext';
 import { Product, Category } from '../types';
 import { formatIndianCurrency, parseIndianCurrency } from '../utils/currency';
+import { ImageUpload } from './ImageUpload';
 
 export const AdminPanel: React.FC = () => {
   const { products, categories, addProduct, updateProduct, deleteProduct, addCategory, updateCategory, deleteCategory } = useEcommerce();
@@ -14,7 +15,7 @@ export const AdminPanel: React.FC = () => {
 
   const [productForm, setProductForm] = useState({
     name: '',
-    images: [''],
+    images: [] as string[],
     regularPrice: '',
     discountedPrice: '',
     category: '',
@@ -33,7 +34,7 @@ export const AdminPanel: React.FC = () => {
   const resetProductForm = () => {
     setProductForm({
       name: '',
-      images: [''],
+      images: [],
       regularPrice: '',
       discountedPrice: '',
       category: '',
@@ -58,9 +59,16 @@ export const AdminPanel: React.FC = () => {
 
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Ensure at least one image is provided
+    if (productForm.images.length === 0) {
+      alert('Please upload at least one product image');
+      return;
+    }
+
     const productData = {
       name: productForm.name,
-      images: productForm.images.filter(img => img.trim() !== ''),
+      images: productForm.images,
       regularPrice: parseFloat(productForm.regularPrice),
       discountedPrice: productForm.discountedPrice ? parseFloat(productForm.discountedPrice) : undefined,
       category: productForm.category,
@@ -120,26 +128,10 @@ export const AdminPanel: React.FC = () => {
     setShowCategoryForm(true);
   };
 
-  const addImageField = () => {
+  const handleImagesChange = (images: string[]) => {
     setProductForm({
       ...productForm,
-      images: [...productForm.images, '']
-    });
-  };
-
-  const removeImageField = (index: number) => {
-    setProductForm({
-      ...productForm,
-      images: productForm.images.filter((_, i) => i !== index)
-    });
-  };
-
-  const updateImageField = (index: number, value: string) => {
-    const newImages = [...productForm.images];
-    newImages[index] = value;
-    setProductForm({
-      ...productForm,
-      images: newImages
+      images
     });
   };
 
@@ -287,40 +279,11 @@ export const AdminPanel: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Product Images
-                    </label>
-                    <div className="space-y-2">
-                      {productForm.images.map((image, index) => (
-                        <div key={index} className="flex space-x-2">
-                          <input
-                            type="url"
-                            placeholder="Image URL"
-                            value={image}
-                            onChange={(e) => updateImageField(index, e.target.value)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          {productForm.images.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeImageField(index)}
-                              className="p-2 text-red-500 hover:bg-red-100 rounded-md"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={addImageField}
-                        className="text-blue-600 hover:text-blue-700 text-sm"
-                      >
-                        + Add Another Image
-                      </button>
-                    </div>
-                  </div>
+                  <ImageUpload
+                    images={productForm.images}
+                    onChange={handleImagesChange}
+                    maxImages={5}
+                  />
 
                   <div>
                     <label className="flex items-center space-x-2">
